@@ -21,6 +21,17 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web-services</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
@@ -97,6 +108,34 @@
                     </excludes>
                 </configuration>
             </plugin>
+
+
+            <plugin>
+                <groupId>com.sun.xml.ws</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>4.0.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sourceDestDir>${project.build.directory}/generated-sources/wsimport</sourceDestDir>
+                    <packageName>io.bayrktlihn.soap.ws.client</packageName>
+
+
+                    <wsdlUrls>
+                        <wsdlUrl>
+                            https://onlineodemetest.vakifbank.com.tr:4443/VposService/TransactionServices.asmx?WSDL
+                        </wsdlUrl>
+                    </wsdlUrls>
+                    <extension>true</extension>
+                </configuration>
+            </plugin>
+
+
         </plugins>
     </build>
 
