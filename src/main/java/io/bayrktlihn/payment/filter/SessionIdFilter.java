@@ -51,6 +51,6 @@ public class SessionIdFilter extends OncePerRequestFilter {
             }
         }
 
-        return request.getParameter("sessionId");
+        return request.getParameter("sessionid");
     }
 }
