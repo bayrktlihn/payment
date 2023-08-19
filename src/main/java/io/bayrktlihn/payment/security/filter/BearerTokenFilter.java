@@ -2,6 +2,7 @@ package io.bayrktlihn.payment.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.bayrktlihn.payment.dto.RestResponseDto;
+import io.bayrktlihn.payment.util.HttpServletRequestUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -12,7 +13,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,7 +38,7 @@ public class BearerTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String bearerToken = getBearerToken(request);
+        String bearerToken = HttpServletRequestUtil.getBearerToken(request);
 
         if (authentication == null && bearerToken != null) {
 
@@ -53,7 +53,6 @@ public class BearerTokenFilter extends OncePerRequestFilter {
 
                 String username = jws.getBody().getSubject();
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
 
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
 
@@ -86,14 +85,4 @@ public class BearerTokenFilter extends OncePerRequestFilter {
         return shouldNotFilterMatcher.matches(request);
     }
 
-    private String getBearerToken(HttpServletRequest request) {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        boolean isBearerToken = header.startsWith("Bearer ");
-
-        if (isBearerToken) {
-            return header.substring("Bearer ".length());
-        }
-        return null;
-
-    }
 }

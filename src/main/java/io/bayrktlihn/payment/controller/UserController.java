@@ -2,6 +2,8 @@ package io.bayrktlihn.payment.controller;
 
 import io.bayrktlihn.payment.dto.LoginRequestDto;
 import io.bayrktlihn.payment.dto.LoginResponseDto;
+import io.bayrktlihn.payment.holder.SessionContextHolder;
+import io.bayrktlihn.payment.model.Session;
 import io.bayrktlihn.payment.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,9 +25,11 @@ public class UserController {
         return userService.login(loginRequestDto);
     }
 
-    @GetMapping
+    @GetMapping("status")
     public String hello() {
-        return "hello";
+        Session session = SessionContextHolder.getSession();
+        System.out.println(session.getSessionId());
+        return "up";
     }
 
 }

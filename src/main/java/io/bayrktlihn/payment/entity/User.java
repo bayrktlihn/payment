@@ -9,11 +9,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,7 +20,6 @@ import java.util.Set;
 @Table(name = "t_user")
 @Getter
 @Setter
-@SuperBuilder
 @NoArgsConstructor
 public class User extends BaseEntity {
 
@@ -34,8 +31,11 @@ public class User extends BaseEntity {
 
     private String password;
 
+    private String firstName;
 
-    @Builder.Default
+    private String lastName;
+
+
     @ManyToMany
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();

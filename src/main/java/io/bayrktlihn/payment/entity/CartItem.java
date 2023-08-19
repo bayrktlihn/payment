@@ -4,34 +4,37 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.math.BigDecimal;
 
-@Entity
-@Table(name = "authority")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Authority extends BaseEntity {
+@Entity
+@Table(name = "cart_item")
+public class CartItem extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private Integer quantity;
 
-    @ManyToMany(mappedBy = "authorities")
-    private Set<User> users = new HashSet<>();
+    private BigDecimal basePrice;
 
-    @ManyToMany(mappedBy = "authorities")
-    private Set<Role> roles = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
+    @ManyToOne
+    @JoinColumn(name = "cart_id")
+    private Cart cart;
 }

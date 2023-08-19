@@ -8,12 +8,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -24,9 +30,11 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final ObjectMapper objectMapper;
 
-    @Bean
+
     BearerTokenFilter bearerTokenFilter() {
-        return new BearerTokenFilter(base64EncodedJwtSecretKey, new AntPathRequestMatcher("/api/v1/users/login"), userDetailsService, objectMapper);
+        OrRequestMatcher orRequestMatcher = getPermitAllRequestMatchers();
+
+        return new BearerTokenFilter(base64EncodedJwtSecretKey, orRequestMatcher, userDetailsService, objectMapper);
     }
 
     @Bean
@@ -36,14 +44,39 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        OrRequestMatcher permitAllRequestMatchers = getPermitAllRequestMatchers();
+
         return http
+                .cors(httpSecurityCorsConfigurer -> {
+                    CorsConfiguration corsConfiguration = new CorsConfiguration();
+                    corsConfiguration.setAllowedOrigins(List.of("*"));
+                    corsConfiguration.setAllowedMethods(List.of("*"));
+                    corsConfiguration.setAllowedHeaders(List.of("*"));
+                    corsConfiguration.setAllowCredentials(true);
+
+                    UrlBasedCorsConfigurationSource configurationSource = new UrlBasedCorsConfigurationSource();
+                    configurationSource.registerCorsConfiguration("/**", corsConfiguration);
+                    httpSecurityCorsConfigurer.configurationSource(configurationSource);
+                })
+                .sessionManagement(httpSecuritySessionManagementConfigurer -> {
+                    httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                })
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
-                    authorizationManagerRequestMatcherRegistry.requestMatchers(new AntPathRequestMatcher("/api/v1/users/login")).permitAll()
+                    authorizationManagerRequestMatcherRegistry.requestMatchers(permitAllRequestMatchers).permitAll()
                             .anyRequest().authenticated();
                 })
                 .addFilterBefore(bearerTokenFilter(), BasicAuthenticationFilter.class)
                 .build();
+    }
+
+    private static OrRequestMatcher getPermitAllRequestMatchers() {
+        OrRequestMatcher permitAllRequestMatchers = new OrRequestMatcher(
+                new AntPathRequestMatcher("/api/v1/users/login"),
+                new AntPathRequestMatcher("/api/v1/users/status")
+        );
+        return permitAllRequestMatchers;
     }
 
 }
