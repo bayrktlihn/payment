@@ -19,14 +19,22 @@ public class HttpServletRequestUtil {
             "REMOTE_ADDR"};
 
     public static String getBearerToken(HttpServletRequest request) {
+        return getTokenFromAuthorization(request, "Bearer ");
+    }
+
+    public static String getBasicToken(HttpServletRequest request) {
+        return getTokenFromAuthorization(request, "Basic ");
+    }
+
+    private static String getTokenFromAuthorization(HttpServletRequest request, String startWiths) {
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authorization == null) {
             return null;
         }
 
-        if (authorization.startsWith("Bearer ")) {
-            return authorization.substring("Bearer ".length());
+        if (authorization.startsWith(startWiths)) {
+            return authorization.substring(startWiths.length());
         }
 
         return null;
